@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { InputSection } from "./components/InputSection";
 import { PreviewSection } from "./components/PreviewSection";
 import { ErrorAlert } from "./components/ErrorAlert";
+import logo from "../assets/Rowad-Logo.png";
 
 function App() {
   const [processedData, setProcessedData] = useState<any[]>([]);
@@ -30,7 +31,7 @@ function App() {
           <div className="flex items-center space-x-4">
             <div className="flex-shrink-0">
               <img
-                src="/src/assets/Rowad-Logo.png"
+                src={logo}
                 alt="Rowad Modern Engineering"
                 className="h-12 w-auto object-contain"
               />

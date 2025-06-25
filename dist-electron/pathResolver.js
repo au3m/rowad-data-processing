@@ -13,5 +13,5 @@ export function getAssetPath() {
 export function getPythonPath() {
     return isDev()
         ? path.join(app.getAppPath(), "./src/python/text.py")
-        : path.join(process.resourcesPath, "../src/python/text.py");
+        : path.join(app.getAppPath(), "../resources/src/python/text.py");
 }
