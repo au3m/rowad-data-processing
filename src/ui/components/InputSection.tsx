@@ -1,47 +1,61 @@
-import React, { useState, useRef } from 'react';
-import { Upload, FileText, X, AlertCircle } from 'lucide-react';
-import * as XLSX from 'xlsx';
+import React, { useState, useRef } from "react";
+import { Upload, FileText, X, AlertCircle } from "lucide-react";
+import * as XLSX from "xlsx";
+
+declare global {
+  interface Window {
+    api: {
+      processText: (text: string) => Promise<string>;
+    };
+  }
+}
 
 interface InputSectionProps {
-  onDataProcessed: (data: any[], source: 'text' | 'file') => void;
+  onDataProcessed: (data: any[], source: "text" | "file") => void;
   onError: (error: string) => void;
 }
 
-export const InputSection: React.FC<InputSectionProps> = ({ onDataProcessed, onError }) => {
-  const [inputType, setInputType] = useState<'text' | 'file'>('text');
-  const [textInput, setTextInput] = useState('');
+export const InputSection: React.FC<InputSectionProps> = ({
+  onDataProcessed,
+  onError,
+}) => {
+  const [inputType, setInputType] = useState<"text" | "file">("text");
+  const [textInput, setTextInput] = useState("");
   const [isDragActive, setIsDragActive] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleTextProcess = () => {
+  const handleTextProcess = async () => {
     if (!textInput.trim()) {
-      onError('Please enter some text to process');
+      onError("Please enter some text to process");
       return;
     }
 
     setIsProcessing(true);
-    
-    // Simulate processing delay
-    setTimeout(() => {
-      const lines = textInput.split('\n').filter(line => line.trim());
+
+    try {
+      // Call Python script via IPC
+      const processed = await window.api.processText(textInput);
+      const lines = textInput.split("\n").filter((line) => line.trim());
       const processedData = lines.map((line, index) => ({
         id: index + 1,
         original: line,
-        processed: line.toUpperCase(),
+        processed: processed, // Use the processed output from Python
         length: line.length,
-        words: line.split(' ').length
+        words: line.split(" ").length,
       }));
-      
-      onDataProcessed(processedData, 'text');
+      onDataProcessed(processedData, "text");
+    } catch (err) {
+      onError("Failed to process text");
+    } finally {
       setIsProcessing(false);
-    }, 1000);
+    }
   };
 
   const handleFileUpload = (file: File) => {
     if (!file.name.match(/\.(xlsx|xls|csv)$/)) {
-      onError('Please upload a valid Excel file (.xlsx, .xls) or CSV file');
+      onError("Please upload a valid Excel file (.xlsx, .xls) or CSV file");
       return;
     }
 
@@ -52,21 +66,21 @@ export const InputSection: React.FC<InputSectionProps> = ({ onDataProcessed, onE
     reader.onload = (e) => {
       try {
         const data = new Uint8Array(e.target?.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: 'array' });
+        const workbook = XLSX.read(data, { type: "array" });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(worksheet);
-        
+
         const processedData = jsonData.map((row: any, index) => ({
           id: index + 1,
           ...row,
-          _processed: true
+          _processed: true,
         }));
 
-        onDataProcessed(processedData, 'file');
+        onDataProcessed(processedData, "file");
         setIsProcessing(false);
       } catch (error) {
-        onError('Error processing file. Please check the file format.');
+        onError("Error processing file. Please check the file format.");
         setIsProcessing(false);
       }
     };
@@ -77,7 +91,7 @@ export const InputSection: React.FC<InputSectionProps> = ({ onDataProcessed, onE
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragActive(false);
-    
+
     const files = Array.from(e.dataTransfer.files);
     if (files.length > 0) {
       handleFileUpload(files[0]);
@@ -96,33 +110,33 @@ export const InputSection: React.FC<InputSectionProps> = ({ onDataProcessed, onE
   const clearFile = () => {
     setUploadedFile(null);
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   };
 
   return (
     <div className="card h-full">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Data Input</h2>
-      
+
       {/* Input Type Toggle */}
       <div className="flex bg-gray-100 rounded-lg p-1 mb-6">
         <button
-          onClick={() => setInputType('text')}
+          onClick={() => setInputType("text")}
           className={`flex-1 py-2 px-4 rounded-md font-medium transition-all duration-200 ${
-            inputType === 'text'
-              ? 'bg-white text-blue-600 shadow-sm'
-              : 'text-gray-600 hover:text-gray-800'
+            inputType === "text"
+              ? "bg-white text-blue-600 shadow-sm"
+              : "text-gray-600 hover:text-gray-800"
           }`}
         >
           <FileText className="w-4 h-4 inline mr-2" />
           Text Input
         </button>
         <button
-          onClick={() => setInputType('file')}
+          onClick={() => setInputType("file")}
           className={`flex-1 py-2 px-4 rounded-md font-medium transition-all duration-200 ${
-            inputType === 'file'
-              ? 'bg-white text-blue-600 shadow-sm'
-              : 'text-gray-600 hover:text-gray-800'
+            inputType === "file"
+              ? "bg-white text-blue-600 shadow-sm"
+              : "text-gray-600 hover:text-gray-800"
           }`}
         >
           <Upload className="w-4 h-4 inline mr-2" />
@@ -131,7 +145,7 @@ export const InputSection: React.FC<InputSectionProps> = ({ onDataProcessed, onE
       </div>
 
       {/* Text Input Section */}
-      {inputType === 'text' && (
+      {inputType === "text" && (
         <div className="space-y-4">
           <textarea
             value={textInput}
@@ -150,14 +164,14 @@ export const InputSection: React.FC<InputSectionProps> = ({ onDataProcessed, onE
                 Processing...
               </>
             ) : (
-              'Process Text'
+              "Process Text"
             )}
           </button>
         </div>
       )}
 
       {/* File Upload Section */}
-      {inputType === 'file' && (
+      {inputType === "file" && (
         <div className="space-y-4">
           <div
             onDrop={handleDrop}
@@ -165,8 +179,8 @@ export const InputSection: React.FC<InputSectionProps> = ({ onDataProcessed, onE
             onDragLeave={handleDragLeave}
             className={`border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200 ${
               isDragActive
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-300 hover:border-gray-400'
+                ? "border-blue-500 bg-blue-50"
+                : "border-gray-300 hover:border-gray-400"
             }`}
           >
             {uploadedFile ? (
@@ -199,7 +213,9 @@ export const InputSection: React.FC<InputSectionProps> = ({ onDataProcessed, onE
                 <input
                   ref={fileInputRef}
                   type="file"
-                  onChange={(e) => e.target.files && handleFileUpload(e.target.files[0])}
+                  onChange={(e) =>
+                    e.target.files && handleFileUpload(e.target.files[0])
+                  }
                   accept=".xlsx,.xls,.csv"
                   className="hidden"
                 />
