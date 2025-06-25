@@ -1,7 +1,8 @@
 {
-  "name": "vite-react-typescript-starter",
+  "name": "rowad-data-processor",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "author": "rme",
   "type": "module",
   "main": "dist-electron/main.js",
   "scripts": {

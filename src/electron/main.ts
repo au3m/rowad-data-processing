@@ -12,7 +12,7 @@ app.on("ready", () => {
     },
   });
 
-  mainWindow.setMenuBarVisibility(false); // Disable menu bar
+  //mainWindow.setMenuBarVisibility(false); // Disable menu bar
 
   if (isDev()) {
     mainWindow.loadURL("http://localhost:5123");

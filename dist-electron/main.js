@@ -10,7 +10,7 @@ app.on("ready", () => {
             preload: getPreloadPath(),
         },
     });
-    mainWindow.setMenuBarVisibility(false); // Disable menu bar
+    //mainWindow.setMenuBarVisibility(false); // Disable menu bar
     if (isDev()) {
         mainWindow.loadURL("http://localhost:5123");
     }
