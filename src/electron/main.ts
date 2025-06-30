@@ -1,9 +1,10 @@
 import { app, BrowserWindow } from "electron";
-import { getPreloadPath, getUIPath } from "./pathResolver.js";
+import { getPreloadPath, getPythonPath, getUIPath } from "./pathResolver.js";
 import { ipcMainHandle, isDev } from "./util.js";
 import { processTextWithPython } from "./pythonBridge.js";
 
 app.on("ready", () => {
+  console.log("Python script path:", getPythonPath());
   const mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,

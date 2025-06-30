@@ -4,6 +4,7 @@ import { getPythonPath } from "./pathResolver.js";
 export function processTextWithPython(text: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const pythonPath = getPythonPath();
+    console.log("python button pressed!");
     const python = spawn("python", [pythonPath], {
       cwd: process.cwd(),
       stdio: ["pipe", "pipe", "pipe"],

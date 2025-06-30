@@ -11,7 +11,10 @@ export function getAssetPath() {
     return path.join(app.getAppPath(), isDev() ? "." : "..", "/src/assets");
 }
 export function getPythonPath() {
-    return isDev()
-        ? path.join(app.getAppPath(), "./src/python/text.py")
-        : path.join(app.getAppPath(), "../resources/src/python/text.py");
+    if (isDev()) {
+        return path.join(app.getAppPath(), "src/python/text.py");
+    }
+    else {
+        return path.join(process.resourcesPath, "src/python/text.py");
+    }
 }
